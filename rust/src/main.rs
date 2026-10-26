@@ -1088,7 +1088,7 @@ impl App {
                     .push(("正在自动重启网关使账号生效…".into(), true));
                 self.refresh();
                 if !self.busy {
-                    self.restart();
+                    self.restart(true);
                 }
             }
             Msg::Usage(u) => {
@@ -1216,7 +1216,7 @@ impl App {
         });
     }
 
-    fn restart(&mut self) {
+    fn restart(&mut self, announce_to_account_page: bool) {
         if self.busy {
             return;
         }
@@ -1235,7 +1235,12 @@ impl App {
                 ), ok, true),
                 Err(e) => (format!("重启失败: {}", e), false, false),
             };
-            let _ = tx.send(Msg::Toast(msg, ok));
+            let _ = tx.send(Msg::Toast(msg.clone(), ok));
+            // 登录页的日志区停在「正在自动重启网关使账号生效…」，toast 六秒就消失，
+            // 用户看不到结束信号；由登录流程触发的重启额外落一行到日志。
+            if announce_to_account_page {
+                let _ = tx.send(Msg::OAuthLog(msg, ok));
+            }
             let _ = tx.send(Msg::Busy(false, String::new()));
             let _ = tx.send(Msg::State(sys::collect()));
             if started { let _ = tx.send(Msg::RefreshModels); }
@@ -1266,7 +1271,7 @@ impl App {
                     Instant::now(),
                 ));
                 self.busy = false;
-                self.restart();
+                self.restart(false);
             }
             Err(e) => self.toast = Some((format!("写入失败: {}", e), false, Instant::now())),
         }
@@ -1438,7 +1443,7 @@ impl App {
         match sys::save_free_gateway_settings(self.free_gateways) {
             Ok(()) => {
                 self.saved_free_gateways = self.free_gateways;
-                self.restart();
+                self.restart(false);
             }
             Err(error) => self.toast = Some((format!("免费网关配置保存失败: {error}"), false, Instant::now())),
         }
@@ -1541,7 +1546,7 @@ impl App {
                         self.refresh();
                     }
                     if btn(ui, "重启", CARD, TX2, !self.busy) {
-                        self.restart();
+                        self.restart(false);
                     }
                 });
             });

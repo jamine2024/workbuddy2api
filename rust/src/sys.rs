@@ -93,7 +93,8 @@ pub const DEFAULT_CONFIG: &str = r#"{
     "checkin_hours": [9, 21], "travel_hours": [9, 21], "activity_hours": [10],
     "keepalive_hours": [22], "school_hours": [12], "cat_hours": [1],
     "checkin_enabled": true, "travel_enabled": true, "activity_enabled": true,
-    "keepalive_enabled": true, "school_enabled": true, "cat_enabled": true
+    "keepalive_enabled": true,
+    "school_enabled": false, "cat_enabled": false
   },
   "global": { "enabled": true, "chat_base": "", "billing_base": "" },
   "free_gateways": { "opencode": { "enabled": true }, "kilo": { "enabled": true } },

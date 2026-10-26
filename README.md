@@ -27,7 +27,7 @@
 | **免费网关** | 内置 OpenCode / Kilo 匿名通道，用 `opencode:` / `kilo:` 前缀调用，无需账号 |
 | **实时用量** | `/v1/usage/live` 返回聚合计数（进行中请求、已完成输出 token、估算中的 token），不落盘任何生成内容 |
 | **悬浮窗 HUD** | 每秒采样网关计数，生成中显示带 `≈` 的估算值，请求结束替换为上游实际用量 |
-| **绿色运行** | 内置 Python 运行时与浏览器内核，不写系统目录，卸载保留用户数据 |
+| **绿色运行** | 内置 Camoufox 浏览器内核，不写系统目录，卸载保留用户数据；面板运行不需要另装 Python 或 Go |
 
 ## 下载与安装
 
@@ -62,12 +62,15 @@ runtime\python\python.exe addaccount.py
 
 ## 构建
 
-三个部分相互独立，产物顺序是：网关 → 桌面 → 安装包。
+三个部分相互独立，产物顺序是：内置浏览器内核 → 网关 → 桌面 → 安装包。
 
 ```powershell
+# 0) 备齐内置浏览器内核（桌面端编译的前置，见下方说明）
+python tools\prepare_login_browser.py
+
 # 网关（Go）
 cd gateway
-go test ./internal/server ./internal/upstream
+go test ./cmd/server ./internal/freegateway ./internal/server ./internal/upstream
 go build -trimpath -ldflags '-s -w' -o ../wb2api.exe ./cmd/server
 
 # 桌面（Rust，会内嵌上一步的 wb2api.exe，需先停掉正在运行的网关）
@@ -77,6 +80,10 @@ cargo build --release
 # 安装包（NSIS）
 .\tools\Build-Installer.ps1
 ```
+
+第 0 步不能省：`rust/src/login_browser.rs` 用 `include_bytes!` 把 `browser/camoufox-win-x64.zip` 直接编进桌面 EXE，而这个 zip 被 `.gitignore` 排除、也不在 Releases 里，**clone 后不跑第 0 步则 `cargo build` 会以 `couldn't read ...camoufox-win-x64.zip` 失败**。该脚本从上游 Camoufox 发布页下载 1.22 GiB 原包、剔除跨平台字体后重打包成 164 MB，需要相应带宽与磁盘空间；校验值记录在 `browser/manifest.json`。
+
+`go test ./...` 会有一条 `TestRunSchoolNowBuildsCommand` 失败——便携源码包未包含仓库根 `scripts/` 下的 `school_open_day_2026.py` 等活动脚本（该目录当前只有 `list_models.py`），属已知情况，原因与影响见 [gateway/README.md](gateway/README.md)。
 
 ## 目录结构
 

@@ -4,7 +4,7 @@
 
 | 组件 | 版本 / 位置 | 许可 | 来源 |
 |---|---|---|---|
-| **WorkBuddy2API 网关**（`wb2api.exe`，以及 `install.py` / `addaccount.py` / `scripts/list_models.py` 等脚本所对接的全部网关行为） | 随本仓库分发的预编译二进制 | MIT | [HanawaBanana/workbuddy2api](https://github.com/HanawaBanana/workbuddy2api)（延续仓库）<br>原始作者 [Sliverkiss/workbuddy2api](https://github.com/Sliverkiss/workbuddy2api) |
+| **WorkBuddy2API 网关**（`wb2api.exe`，以及 `install.py` / `addaccount.py` / `scripts/list_models.py` 等脚本所对接的全部网关行为） | 源码见 `gateway/`（基于 `5755fe3` 重建），随包以 `wb2api.exe` 分发 | MIT | [HanawaBanana/workbuddy2api](https://github.com/HanawaBanana/workbuddy2api)（延续仓库）<br>原始作者 [Sliverkiss/workbuddy2api](https://github.com/Sliverkiss/workbuddy2api) |
 | **Python Embeddable Package** | 3.12.10，目录 `runtime/python/` | PSF License Agreement | [python.org](https://www.python.org/downloads/windows/)，完整文本见 `runtime/python/LICENSE.txt` |
 | **Camoufox 内置登录浏览器** | 156.0.1-beta.36，`browser/camoufox-win-x64.zip`，同时编译进桌面 EXE | MPL-2.0，包含上游第三方组件许可；Cursory 为 LGPL-3.0-or-later | [对应源码和原始发布](https://github.com/daijro/camoufox/tree/v156.0.1-beta.36)，完整 MPL 与 Cursory 许可随内核的 `licenses/` 分发；浏览器自带的其他许可可在 `about:license` 查看 |
 | 本项目新增部分（`control_panel.py`、`ui/`、`0_panel.bat` 等） | — | MIT | 本仓库 |
@@ -23,7 +23,7 @@ WorkBuddy2API 网关最初由 **Sliverkiss** 开发并以 MIT License 开源：
 
 ### 延续仓库
 
-**HanawaBanana/workbuddy2api** 是原始仓库的延续副本，保存了上游最后一个公开提交（`9a26ae7`），并按原项目的 MIT License 继续维护：
+**HanawaBanana/workbuddy2api** 是原始仓库的延续副本，收录了原库公开过的全部功能并按原项目的 MIT License 继续维护：
 
 - https://github.com/HanawaBanana/workbuddy2api
 

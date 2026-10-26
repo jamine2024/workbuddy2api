@@ -87,6 +87,34 @@ fn native_browser_isolates_cookies_storage_and_fingerprints() {
     fs::remove_dir_all(root).unwrap();
 }
 
+#[test]
+fn parent_lock_is_in_use_only_while_someone_holds_it() {
+    let root = test_root();
+    let profile = Profile::prepare(&root, "cn", None).unwrap();
+    let dir = profile.directory(&root).unwrap().join("profile");
+
+    assert!(!profile_in_use(&dir), "无锁文件时不得判为占用");
+
+    // 浏览器被强杀后锁文件会残留，存在本身不等于有人在用。
+    fs::write(dir.join("parent.lock"), "").unwrap();
+    assert!(!profile_in_use(&dir), "陈旧锁残留时不得判为占用");
+
+    // Camoufox 以独占方式持有该文件，复现同样的共享模式即可验证判活方向。
+    #[cfg(windows)]
+    {
+        use std::os::windows::fs::OpenOptionsExt;
+        let held = OpenOptions::new()
+            .write(true)
+            .share_mode(0)
+            .open(dir.join("parent.lock"))
+            .unwrap();
+        assert!(profile_in_use(&dir), "锁被持有时必须判为占用");
+        drop(held);
+    }
+    assert!(!profile_in_use(&dir), "释放后应回到未占用");
+    fs::remove_dir_all(root).unwrap();
+}
+
 fn report(root: &Path, profile: &Profile) -> Value {
     // Reuse one origin across all profiles and launches so isolation is observable.
     // Origin is fixed per test process, rather than allocating a different origin

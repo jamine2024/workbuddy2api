@@ -54,7 +54,7 @@ VIAddVersionKey /LANG=2052 "LegalCopyright" "WorkBuddy2API contributors"
 !insertmacro MUI_PAGE_DIRECTORY
 !insertmacro MUI_PAGE_INSTFILES
 !insertmacro MUI_PAGE_FINISH
-!define MUI_UNCONFIRMPAGE_TEXT_TOP "卸载将停止服务并移除程序及快捷方式。账号、配置、用量记录和日志将保留在用户数据目录。"
+!define MUI_UNCONFIRMPAGE_TEXT_TOP "卸载将停止服务并移除程序及快捷方式。账号、配置、用量记录和日志默认保留在用户数据目录，下一步可选择一并删除。"
 !insertmacro MUI_UNPAGE_CONFIRM
 !insertmacro MUI_UNPAGE_INSTFILES
 !insertmacro MUI_LANGUAGE "SimpChinese"
@@ -136,8 +136,13 @@ Section "Uninstall"
   Delete "$INSTDIR\LICENSE"
   Delete "$INSTDIR\NOTICE.md"
   Delete "$INSTDIR\Uninstall.exe"
-  ; Non-recursive: user-created files and the entire separate data directory remain intact.
+  ; Non-recursive: user-created files remain intact.
   RMDir "$INSTDIR"
   DeleteRegKey HKCU "${UNINSTALL_KEY}"
   DeleteRegKey HKCU "Software\${APP_ID}"
+  ; 默认仍保留用户数据；只在显式确认后清目录——里面是账号凭证与 API 密钥，
+  ; 静默保留等于卸载后本机仍可读回账号令牌。/SD IDNO 保证 /S 静默卸载不删数据。
+  MessageBox MB_YESNO|MB_ICONQUESTION "是否同时删除用户数据目录？$\r$\n$\r$\n位置：$LOCALAPPDATA\${APP_ID}$\r$\n内含账号凭证、API 密钥、浏览器环境与运行日志。$\r$\n选择「否」将全部保留，便于以后重装继续使用。" /SD IDNO IDNO keep_userdata
+    RMDir /r "$LOCALAPPDATA\${APP_ID}"
+  keep_userdata:
 SectionEnd
